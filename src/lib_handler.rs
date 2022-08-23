@@ -1,15 +1,14 @@
 use crate::lib_scraper;
+use crate::lib_text_processor;
 
 const WOD_TYPE_UNDEFINED_ID: i32 = 4;
 
 pub fn format_wod_name(wod_name: String) -> String {
-    let name = wod_name.split("Hero WOD: ").collect::<Vec<&str>>()[1].trim();
-    return name.to_string();
+    return lib_text_processor::remove_pref(wod_name, "Hero WOD: ");
 }
 
 pub fn format_wod_type(wod_type: String) -> String {
-    let name = wod_type.split("WOD Type: ").collect::<Vec<&str>>()[1].trim();
-    return name.to_string();
+    return lib_text_processor::remove_pref(wod_type, "WOD Type: ");
 }
 
 /**
@@ -19,13 +18,11 @@ pub fn format_wod_type(wod_type: String) -> String {
 pub fn get_wod_category_id(wod_category: String) -> i32 {
     let sanitized = format_wod_type(wod_category.to_string());
     let wod_types: Vec<&str> = vec!["EMOM", "AMRAP", "For Time"];
-    let position = wod_types
-        .iter()
-        .position(|&x| x.trim() == sanitized.as_str());
-    return match position {
-        Some(x) => x as i32 + 1,
-        None => WOD_TYPE_UNDEFINED_ID,
-    };
+    let position = lib_text_processor::get_word_position(&sanitized, &wod_types.join(" "));
+    if position == -1 {
+        return WOD_TYPE_UNDEFINED_ID;
+    }
+    return position + 1 as i32;
 }
 
 pub fn get_wod_type_by_criteria(wod_type: i32, details: &Vec<String>) -> i32 {
@@ -37,14 +34,40 @@ pub fn get_wod_type_by_criteria(wod_type: i32, details: &Vec<String>) -> i32 {
     return wod_type;
 }
 
+pub fn get_wod_time(wod_type: String, details: &Vec<String>) -> String {
+    let mut time = "";
+    let mut title_with_time = String::new();
+    let minutes = "minutes";
+    let first_detail = details[0].to_string().to_lowercase();
+
+    // try with wod type if exists
+    let mut position = lib_text_processor::get_word_position(&wod_type, &minutes);
+    if position == -1 {
+        // try with first detail if exists
+        position = lib_text_processor::get_word_position(&first_detail, &minutes);
+        if position > -1 {
+            title_with_time = first_detail.to_string();
+        }
+    } else {
+        title_with_time = wod_type;
+    }
+
+    if position > -1 {
+        let words = lib_text_processor::get_words_from_sentence(&title_with_time);
+        time = words[position as usize - 1].trim();
+    }
+    return time.to_string();
+}
+
 pub fn get_wod_rounds(wod_type: i32, details: &Vec<String>) -> i32 {
     let mut rounds = 0;
     if wod_type != 2 {
         let first_detail = details[0].to_string().to_lowercase();
         if first_detail.find("rounds") != None {
-            let words = first_detail.split(" ").collect::<Vec<&str>>();
-            let position = words.iter().position(|&x| x.contains("rounds"));
-            rounds = words[position.unwrap() - 1].trim().parse::<i32>().unwrap();
+            let words = lib_text_processor::get_words_from_sentence(&first_detail);
+            let position = lib_text_processor::get_word_position(&first_detail, "rounds");
+            // pre position of the word "rounds"
+            rounds = words[position as usize - 1].trim().parse::<i32>().unwrap();
         }
     }
     return rounds;
