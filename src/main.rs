@@ -1,5 +1,6 @@
 mod lib_handler;
 mod lib_scraper;
+mod lib_text_processor;
 use itertools::izip;
 
 struct WodItem {
@@ -23,9 +24,11 @@ fn get_wod_info() {
         .map(|x| x.inner_html());
 
     let mut wod_items = Vec::new();
+
     for (wod_name, wod_type, wod_detail) in izip!(wod_names, wod_types, wod_details) {
         let name = lib_handler::format_wod_name(wod_name.to_string());
         let details = lib_handler::get_wod_details(&wod_detail);
+        let time = lib_handler::get_wod_time(wod_type.to_string(), &details);
         let group = lib_handler::get_wod_category_id(wod_type.to_string());
         let rounds = lib_handler::get_wod_rounds(group, &details);
 
@@ -34,7 +37,7 @@ fn get_wod_info() {
             group,
             detail: details,
             rounds: rounds,
-            time: String::new(),
+            time: time,
         };
         wod_items.push(wod_item);
     }
@@ -47,11 +50,12 @@ fn get_wod_info() {
 fn store_information(wod: WodItem) {
     let item_type = lib_handler::get_wod_type_by_criteria(wod.group, &wod.detail);
     println!(
-        "title:{} - type:{} - movements:{} rounds:{}",
+        "title:{} - type:{} - movements:{} rounds:{} time {}",
         wod.name,
         item_type,
         &wod.detail.len(),
-        wod.rounds
+        wod.rounds,
+        wod.time
     );
 }
 
