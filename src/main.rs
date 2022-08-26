@@ -1,6 +1,7 @@
 mod lib_handler;
 mod lib_scraper;
 mod lib_text_processor;
+
 use itertools::izip;
 
 struct WodItem {
@@ -12,10 +13,10 @@ struct WodItem {
 }
 
 fn get_wod_info() {
-    let html_content = lib_scraper::get_html_content();
-    let name_selector = lib_scraper::get_selector(lib_scraper::WOD_NAMES);
-    let type_selector = lib_scraper::get_selector(lib_scraper::WOD_TYPE);
-    let detail_selector = lib_scraper::get_selector(lib_scraper::WOD_DETAILS);
+    let html_content = lib_scraper::get_html_wod_content();
+    let name_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_NAMES);
+    let type_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_TYPE);
+    let detail_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_DETAILS);
 
     let wod_names = html_content.select(&name_selector).map(|x| x.inner_html());
     let wod_types = html_content.select(&type_selector).map(|x| x.inner_html());
@@ -59,6 +60,21 @@ fn store_information(wod: WodItem) {
     );
 }
 
+fn get_movements_info() {
+    let html_content = lib_scraper::get_html_movements_content();
+    let mov_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_MOVEMENTS);
+    let mov_names = html_content.select(&mov_selector).map(|x| x.inner_html());
+
+    let mut index = 1;
+    for mov_name in mov_names {
+        if index >= 27 && index <= 126 {
+            println!("{}", lib_text_processor::remove_issues_from_text(mov_name));
+        }
+        index += 1;
+    }
+}
+
 fn main() {
     get_wod_info();
+    get_movements_info();
 }

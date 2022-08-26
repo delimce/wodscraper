@@ -10,3 +10,4 @@ authors = ["Luis D'Lima <delimce@gmail.com>"]
 reqwest = {version = "0.11", features = ["blocking"]}
 scraper = "0.13.0"
 itertools = "0.10.3"
+regex = "1.6.0"
