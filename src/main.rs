@@ -3,6 +3,7 @@ mod lib_scraper;
 mod lib_text_processor;
 
 use itertools::izip;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 struct WodItem {
     pub name: String,
@@ -60,6 +61,13 @@ fn store_information(wod: WodItem) {
     );
 }
 
+fn capture_time_ms() -> u128 {
+    return SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis();
+}
+
 fn get_movements_info() {
     let html_content = lib_scraper::get_html_movements_content();
     let mov_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_MOVEMENTS);
@@ -75,6 +83,9 @@ fn get_movements_info() {
 }
 
 fn main() {
+    let in_ms = capture_time_ms();
     get_wod_info();
     get_movements_info();
+    let out_ms = capture_time_ms();
+    println!("execute time:{} ms", out_ms - in_ms);
 }
