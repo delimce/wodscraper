@@ -1,6 +1,9 @@
-mod lib_handler;
-mod lib_scraper;
-mod lib_text_processor;
+
+mod handler;
+mod libs;
+
+use libs::text_processor::*;
+use libs::scraper::*;
 
 use itertools::izip;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -14,10 +17,10 @@ struct WodItem {
 }
 
 fn get_wod_info() {
-    let html_content = lib_scraper::get_html_wod_content();
-    let name_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_NAMES);
-    let type_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_TYPE);
-    let detail_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_WOD_DETAILS);
+    let html_content = get_html_wod_content();
+    let name_selector = get_selector(SELECTOR_WOD_NAMES);
+    let type_selector = get_selector(SELECTOR_WOD_TYPE);
+    let detail_selector = get_selector(SELECTOR_WOD_DETAILS);
 
     let wod_names = html_content.select(&name_selector).map(|x| x.inner_html());
     let wod_types = html_content.select(&type_selector).map(|x| x.inner_html());
@@ -28,11 +31,11 @@ fn get_wod_info() {
     let mut wod_items = Vec::new();
 
     for (wod_name, wod_type, wod_detail) in izip!(wod_names, wod_types, wod_details) {
-        let name = lib_handler::format_wod_name(wod_name.to_string());
-        let details = lib_handler::get_wod_details(&wod_detail);
-        let time = lib_handler::get_wod_time(wod_type.to_string(), &details);
-        let group = lib_handler::get_wod_category_id(wod_type.to_string());
-        let rounds = lib_handler::get_wod_rounds(group, &details);
+        let name = handler::format_wod_name(wod_name.to_string());
+        let details = handler::get_wod_details(&wod_detail);
+        let time = handler::get_wod_time(wod_type.to_string(), &details);
+        let group = handler::get_wod_category_id(wod_type.to_string());
+        let rounds = handler::get_wod_rounds(group, &details);
 
         let wod_item = WodItem {
             name: name,
@@ -50,7 +53,7 @@ fn get_wod_info() {
 }
 
 fn store_information(wod: WodItem) {
-    let item_type = lib_handler::get_wod_type_by_criteria(wod.group, &wod.detail);
+    let item_type = handler::get_wod_type_by_criteria(wod.group, &wod.detail);
     println!(
         "title:{} - type:{} - movements:{} rounds:{} time {}",
         wod.name,
@@ -69,14 +72,14 @@ fn capture_time_ms() -> u128 {
 }
 
 fn get_movements_info() {
-    let html_content = lib_scraper::get_html_movements_content();
-    let mov_selector = lib_scraper::get_selector(lib_scraper::SELECTOR_MOVEMENTS);
+    let html_content = get_html_movements_content();
+    let mov_selector = get_selector(SELECTOR_MOVEMENTS);
     let mov_names = html_content.select(&mov_selector).map(|x| x.inner_html());
 
     let mut index = 1;
     for mov_name in mov_names {
         if index >= 27 && index <= 126 {
-            println!("{}", lib_text_processor::remove_issues_from_text(mov_name));
+            println!("{}", remove_issues_from_text(mov_name));
         }
         index += 1;
     }
@@ -87,5 +90,5 @@ fn main() {
     get_wod_info();
     get_movements_info();
     let out_ms = capture_time_ms();
-    println!("execute time:{} ms", out_ms - in_ms);
+    println!("execution time:{} ms", out_ms - in_ms);
 }
