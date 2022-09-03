@@ -11,5 +11,5 @@ reqwest = {version = "0.11", features = ["blocking"]}
 scraper = "0.13.0"
 itertools = "0.10.3"
 regex = "1.6.0"
-diesel = { version = "2.0.0-rc.0", features = ["mysql"]  }
+diesel = { version = "2.0.0-rc.0", features = ["mysql","r2d2"]  }
 dotenvy = "0.15"
