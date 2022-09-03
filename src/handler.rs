@@ -1,6 +1,5 @@
-
-use crate::libs::text_processor::*;
 use crate::libs::scraper::*;
+use crate::libs::text_processor::*;
 
 const WOD_TYPE_UNDEFINED_ID: i32 = 4;
 

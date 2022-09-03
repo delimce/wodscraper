@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 
 #[derive(Queryable)]
-#[table_name = "tbl_measure"]
+#[diesel(table_name = tbl_measure)]
 pub struct Measure {
     pub id: i32,
     pub name: String,

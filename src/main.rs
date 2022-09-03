@@ -1,9 +1,10 @@
-
+mod database;
 mod handler;
 mod libs;
+mod orm;
 
-use libs::text_processor::*;
 use libs::scraper::*;
+use libs::text_processor::*;
 
 use itertools::izip;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -87,8 +88,14 @@ fn get_movements_info() {
 
 fn main() {
     let in_ms = capture_time_ms();
-    get_wod_info();
-    get_movements_info();
+/*     get_wod_info();
+    get_movements_info(); */
+
+    let measures = database::get_registers();
+    for measure in measures {
+        println!("{}", measure.name);
+    }
+
     let out_ms = capture_time_ms();
     println!("execution time:{} ms", out_ms - in_ms);
 }
