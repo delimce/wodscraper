@@ -7,6 +7,9 @@ use std::env;
 use crate::orm::models::*;
 use crate::orm::schema::*;
 
+const DB_POOL_IDLE: Option<u32> = Some(4);
+const DB_POOL_MAX: u32 = 10;
+
 pub type MysqlPool = Pool<ConnectionManager<MysqlConnection>>;
 pub type MysqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
 
@@ -38,6 +41,8 @@ pub fn create_pool() -> MysqlPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let manager = ConnectionManager::<MysqlConnection>::new(database_url);
     Pool::builder()
+        .min_idle(DB_POOL_IDLE)
+        .max_size(DB_POOL_MAX)
         .build(manager)
         .expect("Failed to create pool.")
 }

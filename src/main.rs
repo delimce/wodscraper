@@ -88,15 +88,15 @@ fn get_movements_info() {
 
 fn main() {
     let in_ms = capture_time_ms();
-    get_wod_info();
-    get_movements_info();
+   /*  get_wod_info();
+    get_movements_info(); */
 
     let pool = database::create_pool();
-    let measures2 = database::get_register_pool(&pool);
+    let measures = database::get_register_pool(&pool);
 
     /*  let measures = database::get_registers(); */
 
-    for measure in measures2 {
+    for measure in measures {
         println!("{}", measure.name);
     }
 
