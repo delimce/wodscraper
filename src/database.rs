@@ -3,6 +3,7 @@ use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use dotenvy::dotenv;
 use std::env;
+use chrono::prelude::*;
 
 use crate::orm::models::*;
 use crate::orm::schema::*;
@@ -20,20 +21,37 @@ pub fn establish_connection() -> MysqlConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-pub fn get_registers() -> Vec<Measure> {
+pub fn get_registers() -> Vec<Movement> {
     let connection = &mut establish_connection();
-    tbl_measure::table
+    tbl_movement::table
         .limit(5)
-        .load::<Measure>(connection)
-        .expect("Error loading measures")
+        .load::<Movement>(connection)
+        .expect("Error loading Movements")
 }
 
-pub fn get_register_pool(pool: &MysqlPool) -> Vec<Measure> {
+pub fn get_register_pool(pool: &MysqlPool) -> Vec<Movement> {
     let use_pool = &mut use_pool(pool);
-    tbl_measure::table
+    tbl_movement::table
         .limit(5)
-        .load::<Measure>(use_pool)
-        .expect("Error loading measures")
+        .load::<Movement>(use_pool)
+        .expect("Error loading Movements")
+}
+
+pub fn insert_movements(pool: &MysqlPool, movements: Vec<String>) {
+    let use_pool = &mut use_pool(pool);
+    let mut movements_to_insert = Vec::new();
+    for movement in movements {
+        let new_movement = NewMovement {
+            name: movement,
+            created_at: get_current_time(),
+            updated_at: get_current_time(),
+        };
+        movements_to_insert.push(new_movement);
+    }
+    diesel::insert_into(tbl_movement::table)
+        .values(&movements_to_insert)
+        .execute(use_pool)
+        .expect("Error saving new movement");
 }
 
 pub fn create_pool() -> MysqlPool {
@@ -50,4 +68,9 @@ pub fn create_pool() -> MysqlPool {
 pub fn use_pool(pool: &MysqlPool) -> MysqlPooledConnection {
     let pool = pool.clone();
     pool.get().expect("Failed to get connection from pool.")
+}
+
+fn get_current_time() -> String {
+    let utc: DateTime<Utc> = Utc::now();
+    utc.format("%Y-%m-%d %H:%M:%S").to_string()
 }

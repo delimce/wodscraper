@@ -72,18 +72,21 @@ fn capture_time_ms() -> u128 {
         .as_millis();
 }
 
-fn get_movements_info() {
+fn get_movements_info() -> Vec<String> {
     let html_content = get_html_movements_content();
     let mov_selector = get_selector(SELECTOR_MOVEMENTS);
     let mov_names = html_content.select(&mov_selector).map(|x| x.inner_html());
 
+    let mut movements = Vec::new();
     let mut index = 1;
     for mov_name in mov_names {
         if index >= 27 && index <= 126 {
-            println!("{}", remove_issues_from_text(mov_name));
+            let fixed_name = remove_issues_from_text(mov_name.to_string());
+            movements.push(fixed_name);
         }
         index += 1;
     }
+    return movements;
 }
 
 fn main() {
@@ -92,13 +95,15 @@ fn main() {
     get_movements_info(); */
 
     let pool = database::create_pool();
-    let measures = database::get_register_pool(&pool);
 
+    database::insert_movements(&pool, get_movements_info());
+
+    /* let measures = database::get_register_pool(&pool); */
     /*  let measures = database::get_registers(); */
 
-    for measure in measures {
+   /*  for measure in measures {
         println!("{}", measure.name);
-    }
+    } */
 
     let out_ms = capture_time_ms();
     println!("execution time:{} ms", out_ms - in_ms);

@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 table! {
-    tbl_measure (id) {
+    tbl_movement (id) {
         id -> Integer,
         name -> Varchar,
         created_at -> Varchar,
