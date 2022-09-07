@@ -1,10 +1,17 @@
 [package]
 name = "wodscraper"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Luis D'Lima <delimce@gmail.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true  # Link-time optimization.
+codegen-units = 1  # Reduce codegen units to reduce binary size.
+
 
 [dependencies]
 reqwest = {version = "0.11", features = ["blocking"]}
