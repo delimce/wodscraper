@@ -1,15 +1,23 @@
+use chrono::prelude::*;
 use diesel::mysql::MysqlConnection;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use dotenvy::dotenv;
 use std::env;
-use chrono::prelude::*;
 
 use crate::orm::models::*;
 use crate::orm::schema::*;
 
 const DB_POOL_IDLE: Option<u32> = Some(4);
 const DB_POOL_MAX: u32 = 10;
+
+pub struct WodItem {
+    pub name: String,
+    pub group: i32,
+    pub rounds: i32,
+    pub time: String,
+    pub detail: Vec<String>,
+}
 
 pub type MysqlPool = Pool<ConnectionManager<MysqlConnection>>;
 pub type MysqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
@@ -52,6 +60,27 @@ pub fn insert_movements(pool: &MysqlPool, movements: Vec<String>) {
         .values(&movements_to_insert)
         .execute(use_pool)
         .expect("Error saving new movement");
+}
+
+pub fn insert_wods(pool: &MysqlPool, wods: Vec<WodItem>) {
+    let use_pool = &mut use_pool(pool);
+    let mut wods_to_insert = Vec::new();
+    for wod in wods {
+        let new_wod = NewWod {
+            name: wod.name,
+            type_id: wod.group,
+            category_id: 2, // heroes
+            rounds: wod.rounds,
+            timecap: wod.time,
+            created_at: get_current_time(),
+            updated_at: get_current_time(),
+        };
+        wods_to_insert.push(new_wod);
+    }
+    diesel::insert_into(tbl_wod::table)
+        .values(&wods_to_insert)
+        .execute(use_pool)
+        .expect("Error saving new wod");
 }
 
 pub fn create_pool() -> MysqlPool {
