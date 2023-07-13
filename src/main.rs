@@ -74,15 +74,14 @@ fn main() {
     let in_ms = capture_time_ms();
     let pool = database::create_pool();
 
-    database::insert_movements(&pool, get_movements_info());
-    database::insert_wods(&pool, get_wods_info());
+    //database::insert_movements(&pool, get_movements_info());
+    let movements = database::get_movements(&pool); //movements with id
 
-    /* let measures = database::get_register_pool(&pool); */
-    /*  let measures = database::get_registers(); */
+    for movement in movements {
+        println!("{}: {}", movement.id, movement.name);
+    }
 
-    /*  for measure in measures {
-        println!("{}", measure.name);
-    } */
+    //database::insert_wods(&pool, get_wods_info());
 
     let out_ms = capture_time_ms();
     println!("execution time:{} ms", out_ms - in_ms);

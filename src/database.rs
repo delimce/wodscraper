@@ -37,10 +37,10 @@ pub fn get_registers() -> Vec<Movement> {
         .expect("Error loading Movements")
 }
 
-pub fn get_register_pool(pool: &MysqlPool) -> Vec<Movement> {
+pub fn get_movements(pool: &MysqlPool) -> Vec<Movement> {
     let use_pool = &mut use_pool(pool);
     tbl_movement::table
-        .limit(5)
+       // .limit(5)
         .load::<Movement>(use_pool)
         .expect("Error loading Movements")
 }

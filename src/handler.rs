@@ -4,7 +4,7 @@ use crate::libs::text_processor::*;
 const WOD_TYPE_UNDEFINED_ID: i32 = 4;
 
 pub fn format_wod_name(wod_name: String) -> String {
-    return remove_pref(wod_name, "Hero WOD: ");
+    return remove_pref(wod_name, "Hero WOD: ").trim().to_string();
 }
 
 pub fn format_wod_type(wod_type: String) -> String {
